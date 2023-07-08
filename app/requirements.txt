@@ -1,0 +1,5 @@
+Flask==2.3.2
+clickhouse-driver==0.2.6
+requests==2.31.0
+gunicorn==20.1.0
+celery==5.3.1

@@ -1,0 +1,64 @@
+version: '3.3'
+
+services:
+
+  clickhouse:
+    image: clickhouse/clickhouse-server
+    networks:
+      - etgb_network
+    ports:
+      - "18123:8123"
+      - "19000:9000"
+    env_file:
+      - ./.env
+
+  rabbitmq:
+    image: rabbitmq:management
+    hostname: rabbitmq
+    restart: always
+    volumes:
+      - rabbit_value:/var/lib/rabbitmq
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    env_file:
+      - ./.env
+    networks:
+      - etgb_network
+  
+  celery:
+    restart: always
+    image: kostkh/etgb_app:v1.0.0
+    command: celery -A core_layer worker -l info
+    env_file:
+      - ./.env
+    depends_on:
+      - clickhouse
+      - rabbitmq
+    volumes:
+      - query_db:/app/query_db/
+    networks:
+      - etgb_network
+
+  app:
+    image: kostkh/etgb_app:v1.0.0
+    restart: always
+    ports:
+      - "5000:5000"
+    networks:
+      - etgb_network
+    volumes:
+      - query_db:/app/query_db/
+    depends_on:
+      - celery
+    env_file:
+      - ./.env
+    extra_hosts:
+    - "host.docker.internal:host-gateway"
+
+volumes:
+  query_db:
+  rabbit_value:
+
+networks:
+  etgb_network:

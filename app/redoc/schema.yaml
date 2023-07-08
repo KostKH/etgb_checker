@@ -1,0 +1,143 @@
+openapi: 3.0.1
+info:
+  title: Документация для etgb_parser API
+  version: "1.0.0"
+
+paths:
+  /:
+    get:
+      tags:
+        - 1.	Приветственный текст
+      summary: GET Greeting text
+      responses:
+        200:
+          description: OK
+          content:
+            'text/html'
+
+
+  /etgb/:
+    post:
+      tags:
+        - 2.	Запрос деклараций
+      summary: POST
+      description: |
+
+      requestBody:
+        description: etgb request
+        content:
+          application/json; charset=utf-8:
+            schema:
+              $ref: '#/components/schemas/CredentialsDto'
+        required: true
+      responses:
+        202:
+          description: ACCEPTED
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/QuerybriefDto'
+        400:
+          $ref: '#/components/responses/BadRequest'
+
+  /etgb/{queryId}:
+    get:
+      tags:
+        - 3.	Получение информации о статусе запроса по Id
+      summary: GET queryId
+      parameters:
+        - name: queryId
+          in: path
+          description: id запроса
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/QueryfullDto'
+        404:
+          $ref: '#/components/responses/NotFound'
+
+components:
+  schemas:
+    CredentialsDto:
+      type: object
+      properties:
+        ozon_client_id:
+          type: string
+        ozon_api_key:
+          type: string
+
+    QuerybriefDto:
+      type: object
+      properties:
+        request_URL:
+          type: string
+        request_id:
+          type: string
+        status_code:
+          type: integer
+        status_text:
+          type: string
+
+    QueryfullDto:
+      type: object
+      properties:
+        etgb_found_total:
+          type: string
+        etgb_saved_new:
+          type: string
+        id:
+          type: string
+        ozone_response_code:
+          type: integer
+        status_code:
+          type: integer
+        status_text:
+          type: string
+
+    NotFound:
+      description: Объект не найден
+      type: object
+      properties:
+        status:
+          description: 'Описание ошибки'
+          example: "NOT_FOUND"
+          type: string
+
+    BadRequest:
+      description: BAD_REQUEST
+      type: object
+      properties:
+        status:
+          description: 'Описание ошибок'
+          example: "FAIL"
+          type: string
+        details:
+          description: 'Позиции с ошибками'
+          type: object
+          ozon_client_id:
+            example: "required"
+            type: string
+          ozon_api_token:
+            example: "required"
+            type: string
+
+  responses:
+    NotFound:
+      description: Объект не найден
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NotFound'
+
+    BadRequest:
+      description: Ошибка в теле запроса
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BadRequest'
