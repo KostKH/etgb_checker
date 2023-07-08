@@ -15,4 +15,4 @@ class StatusCode(enum.Enum):
     OTHER_ERROR = 4006
 
     def __str__(self):
-        return self.value
+        return str(self.name)
