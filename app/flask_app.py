@@ -1,6 +1,6 @@
 from dataclasses import asdict
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, render_template, request
 from markupsafe import escape
 
 from core_layer.models import Queries
@@ -8,7 +8,11 @@ from core_layer.tasks import generate_id, get_etgb
 from db_layer.database import QueryRepository
 from helpers.status_codes import StatusCode
 
-app = Flask(__name__)
+app = Flask(
+    __name__,
+    static_folder='redoc',
+    template_folder='redoc'
+)
 
 
 @app.route('/')
@@ -51,6 +55,13 @@ def get_query_info(query_id):
         return jsonify({'status': 'NOT_FOUND', }), 404
     data = asdict(query_item)
     return jsonify(data), 200
+
+
+@app.route('/redoc')
+def docs() -> str:
+    return render_template(
+        'redoc.html',
+        the_title='ETGB Checker API Documentation')
 
 
 if __name__ == '__main__':
